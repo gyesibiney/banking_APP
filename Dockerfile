@@ -1,19 +1,19 @@
-FROM python:3.10-slim
+FROM python:3.9
 
-WORKDIR /app
+WORKDIR /code
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y gcc python3-dev && rm -rf /var/lib/apt/lists/*
+COPY ./requirements.txt /code/requirements.txt
 
-# Copy requirements first for caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-# Copy application files
-COPY main.py .
+# Copy the model to the container
 COPY DTCv2.joblib .
 
-EXPOSE 8000
+# Copy the FastAPI app code to the container
+COPY main.py .
 
-# Corrected command - points directly to main.py
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Expose the port the FastAPI app will run on
+EXPOSE 7860
+
+# The CMD instruction specifies the command to run when the container starts
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
