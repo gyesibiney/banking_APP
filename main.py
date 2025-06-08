@@ -4,7 +4,7 @@ import joblib
 import pandas as pd
 
 # Load the model
-model = joblib.load("best_model.pkl")
+model = joblib.load("DTCv2.joblib")
 
 # Define the expected input schema
 class ClientData(BaseModel):
