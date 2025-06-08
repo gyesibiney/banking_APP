@@ -11,7 +11,7 @@ Banking Campaign Outcome Prediction Project 🚀
 
 📚 **Description**
 =======================
-This project focuses on predicting customer responses to banking campaigns using machine learning. By leveraging data from past campaigns, we built a robust model to analyze customer characteristics and behaviors, helping to optimize future marketing efforts.
+This project focuses on predicting customer responses to banking term deposit using machine learning. By leveraging data from past campaigns, we built a robust model to predict whether a client will subscribe or will not subcribe to a term deposit.
 
 📖 **Table of Contents**
 =======================
@@ -32,7 +32,7 @@ To set up the environment and get started, follow these installation steps:
 
 ```bash
 # Clone the repository
-git clone https://github.com/gyesibiney/banking_project.git
+git clone https://github.com/gyesibiney/banking_APP.git
 
 # Navigate to the project directory
 cd banking_project
