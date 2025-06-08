@@ -1,17 +1,15 @@
 from fastapi import FastAPI
-import pandas as pd
-import joblib
 from pydantic import BaseModel
+import joblib
+import pandas as pd
 
-app = FastAPI()
+# Load the model
+model = joblib.load("best_model.pkl")
 
-# Load your model
-model = joblib.load('DTCv2.joblib')
-
-# Define input data structure
-class CustomerInput(BaseModel):
-    Age: int
-    Call_Duration_Seconds: int
+# Define the expected input schema
+class ClientData(BaseModel):
+    Age: float
+    Call_Duration_Seconds: float
     Contacts_During_Campaign: int
     Days_Since_Last_Contact: int
     Previous_Contacts: int
@@ -31,21 +29,16 @@ class CustomerInput(BaseModel):
     Contact_Day: str
     Previous_Outcome: str
 
-@app.get("/")
-def home():
-    return {"message": "Banking Churn Prediction API"}
+app = FastAPI()
 
-@app.post("/predict")
-def predict(input_data: CustomerInput):
-    # Convert input to DataFrame
-    input_dict = input_data.dict()
-    input_df = pd.DataFrame([input_dict])
-    
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Bank Subscription Prediction API"}
+
+@app.post("/predict/")
+def predict(data: ClientData):
+    # Convert to DataFrame
+    input_df = pd.DataFrame([data.dict()])
     # Make prediction
-    prediction = model.predict(input_df)[0]
-    probability = model.predict_proba(input_df)[0][1]
-    
-    return {
-        "prediction": "Will Subscribe" if prediction == 1 else "Will not Subscribe",
-        "probability": float(probability)
-    }
+    prediction = model.predict(input_df)
+    return {"subscribe": bool(prediction[0])}
