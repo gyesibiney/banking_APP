@@ -125,6 +125,7 @@ def predict(
         "Previous_Outcome": poutcome
     }])
 
-    prediction = model.predict(input_data)
-    return {"subscribe": bool(prediction[0])}
+    prediction = model.predict(input_data)[0]
+    result = "Client will subscribe" if prediction == 1 else "Client will not subscribe"
+    return {"prediction": result}
 
