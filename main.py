@@ -1,56 +1,84 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import joblib
+import numpy as np
 import pandas as pd
 from typing import Optional
 
-# Define Pydantic models directly in main.py
-class PredictionInput(BaseModel):
+app = FastAPI(
+    title="Bank Term Deposit Subscription Predictor",
+    description="API for predicting client subscription to bank term deposits",
+    version="1.0"
+)
+
+# Load model with version compatibility check
+try:
+    model = joblib.load("DTCv2.joblib")
+    print("✅ Model loaded successfully")
+except Exception as e:
+    print(f"❌ Model loading failed: {str(e)}")
+    raise RuntimeError("Model loading failed - check sklearn versions")
+
+class ClientFeatures(BaseModel):
     age: int
-    call_duration: int
-    campaign_contacts: int
-    days_since_contact: int
-    previous_contacts: int
+    job: str
+    marital: str
+    education: str
+    default: str
+    housing: str
+    loan: str
+    contact: str 
+    month: str
+    day_of_week: str
+    duration: int
+    campaign: int
+    pdays: int
+    previous: int
+    poutcome: str
     emp_var_rate: float
     cons_price_idx: float
     cons_conf_idx: float
     euribor3m: float
     nr_employed: float
-    job: str
-    marital: str
-    education: str
-    loan: str
-    contact_type: str
 
-class PredictionOutput(BaseModel):
-    prediction: int
-    probability: float
-    confidence: str
-
-app = FastAPI()
-
-# Load model
-try:
-    model = joblib.load("DTCv2.joblib")
-except Exception as e:
-    print(f"Failed to load model: {e}")
-
-@app.post("/predict", response_model=PredictionOutput)
-async def predict(input_data: PredictionInput):
+@app.post("/predict")
+async def predict_subscription(client: ClientFeatures):
+    """
+    Predicts whether a client will subscribe to a term deposit
+    Returns:
+    - prediction: 1 (yes) or 0 (no)
+    - probability: Confidence score (0-1)
+    - message: Plain English prediction
+    """
     try:
-        input_df = pd.DataFrame([input_data.dict()])
-        prediction = model.predict(input_df)[0]
-        proba = model.predict_proba(input_df)[0][1]
-        confidence = "high" if proba > 0.7 else "medium" if proba > 0.5 else "low"
+        # Convert input to dataframe
+        input_data = client.dict()
+        input_df = pd.DataFrame([input_data])
         
-        return {
+        # Get prediction
+        prediction = model.predict(input_df)[0]
+        proba = model.predict_proba(input_df)[0][1]  # Probability of "yes"
+        
+        # Format response
+        result = {
             "prediction": int(prediction),
             "probability": float(proba),
-            "confidence": confidence
+            "message": "Will subscribe" if prediction == 1 else "Will not subscribe",
+            "confidence": f"{proba:.0%} confidence"
         }
+        
+        return result
+        
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Prediction failed: {str(e)}"
+        )
 
 @app.get("/")
-async def root():
-    return {"message": "Banking Campaign Prediction API"}
+async def health_check():
+    return {
+        "status": "operational",
+        "model": "Bank Subscription Predictor",
+        "version": "1.0"
+    }
