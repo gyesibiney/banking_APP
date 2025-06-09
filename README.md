@@ -35,10 +35,11 @@ To set up the environment and get started, follow these installation steps:
 git clone https://github.com/gyesibiney/banking_APP.git
 
 # Navigate to the project directory
-cd banking_project
+cd banking_APP
 
 # Install required dependencies
-pip install -r requirements.txt
+pip install -r requirements1.txt # for the modelling and EDA
+pip install -r requirements1.txt # for the API 
 ```
 
 
@@ -48,7 +49,8 @@ To run the app, use the following command:
 bash
 Copy code
 ```
-streamlit run app.py
+uvicorn main:app --reload
+
 ```
 Once running, provide the customer details in the app interface to get a prediction about their likelihood of responding to a campaign.
 
